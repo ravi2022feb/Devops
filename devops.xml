@@ -1,0 +1,297 @@
+Devops skills required<>
+	1) Linux skills
+	2) Source code management (Git & github)
+	3) Continuous integration & continuous delivery (CI/CD) (Jenkins)
+	4) Infrastructure as a code (Terraform, Ansible, Chef)
+	5) Automation (Puppet, Docker, Jenkins)
+	6) Continuous testing (Selineum)
+	7) Containerization (Docker)
+	8) Cloud services knowledge (AWS, Azure, GCP)
+	9) Security (Devsecops)
+	10) Continuous monitoring (Nagios, Sensu)
+</>
+Pre-requisites for lab environment setup<>
+	
+	1) 3 machines (Dev instance, QA instance & Prod instance)
+	2) Dev instance -- git, maven, JRE (java) & Jenkins
+	3) QA instance -- Tomcat
+	4) Prod instance -- Tomcat
+	
+	Configuring Dev server on clean linux instance
+		sudo apt-get update # update the repository.
+		sudo apt-get install git maven -y # installs git & maven
+		git --verion # git verion
+		mvn --version # maven version
+		sudo apt-get install openjdk-8-jre -y # install java
+		java -verion # check java version
+		
+	Configuring QA & Prod servers on clean linux instance
+		sudo apt-get update
+		sudo apt install Tomcat8 Tomcat8-admin -y
+		
+</>	
+1) Linux<>
+
+
+
+</>
+2) Git<>
+	Git is a version controlling and source code management tool. Git helps developers to manage the source code.
+		version controlling types
+		1) centralized version controlling -- old method
+		2) distributed version controlling -- New (Git)
+	Installing Git
+		sudo apt-get install git
+	Check git version
+		git --version
+	Git commands
+		git init (converts a folder into working directory)
+		git add //file name// (move a file to staging area - file called tracked file)
+		git add . (move all files to staging area)
+		git status (check the status of file)
+		git commit -m "//commit message//" (move file from staging area to local repository)
+			git commit -m "my first commit"
+		git log (to see commits)
+		git log --oneline (to see commits in oneline)
+		git remote add origin *url* (add remote repositary - github)
+		git push -u origin main (main=branch name)
+		
+	* Default branch is Master
+	* by default every file in the working directory is untracked, unless it is added by command "git add"
+	* Latest commit tagged as (head)
+	
+	
+</>
+3) Github<>	
+	Github is open-source cloud/remote repository. where developers can store their code.
+	
+	**test github repository
+	https://github.com/sunildevops77/maven.git
+	https://github.com/sunildevops77/testingnew.git
+</>
+4) Maven (Build tool)<>
+
+</>
+5) Jenkins (CI/CD automation tool)<>
+	
+	Jenkins is a self-contained open-sourced automation server which can be used to automate all the tasks related to software development life cycle. which consists development, build, deploying, testing and delivery activities
+	Jenkins is a tool for implementing CI/CD (continuous integration & continuous delivery) process.
+	Jenkins can be installed even on standalone by any machine with a Java run time environment installed.
+	
+	CI/CD stages<>
+			| Stage 1 - continuous download
+		CI	| Stage 2 - continuous build
+			| Stage 3 - continuous deploying
+			| Stage 4 - continuous testing
+		
+		CD	| Stage 5 - continuous delivery
+	</>
+	Installing & Run Jenkins<>
+	For Linux download the Jenkins.war file from official website
+	link: https://get.jenkins.io/war-stable/2.319.3/jenkins.war
+	command:
+	sudo wget https://get.jenkins.io/war-stable/2.319.3/jenkins.war
+	and run command: java -jar jenkins.war
+	Jenkins will run on port no 8080, and can be accessed by public IP of the server
+		ex: //public IP of the server//:8080
+	open jenkins in browser and copy the password from jenkins terminal.
+	Then the jenkins will run and ask to create first admin account. follow accordingly.
+	
+	Notes:
+		* Java is the pre-requisite for jenkins
+		* Jenkins can be downloaded from official website jenkins.io
+		* Jenkins server can be started with command [Java -jar jenkins.war]
+		* Add Plugins - Manage Jenkins - Manage plugins - available tab - search for requirement - install without restart.
+	</>
+	User Management & Security<>
+		- Manage Jenkons - Manage users - Create user
+	
+	Role based authorisation strategy
+	To enable Role based authentication, install "Role based authorisation strategy" plugin. 
+		Then goto manage jenkins - configure global security - under authorization mark the "Role-based strategy", apply and save.
+	
+	Manageing roles
+		Global Roles
+			Goto manage jenkins - manage and assign roles - manage roles
+			add "Global Roles" 	# for jenkins features and options
+			and mark the Jenkins features to make accessible
+		Item (project) Roles	
+			add Item (project) Roles # for porject and jobs
+			add pattern # a filter to access the projects/jobs 
+				ex: Dev.* user can only access the projects/jobs that starting with "Dev".
+			and mark the project feautures to make accessible
+	Assigning Roles to Users
+		Goto manage jenkins - manage and assign roles - Assign Roles
+			add users and assign roles accordingly
+	</>
+	Project/Item/job management<>
+	Click on "create a job" or "New item" to start a project/job
+	
+	</>
+	Jenkins Master - Slave configuration<>
+	Pre-reqisites:
+	1) Establishing passwordless communication between Master and slave machine<>
+		a) Set ssh "passwordauthentication" to yes in slave machine
+		in slave machine, 
+			cd /etc/ssh
+			sudo vim sshd_config
+		find the string "passwordauthentication" and set value to yes
+			press esc
+			:wq to save and quit
+		and restart the ssh service
+			sudo service ssh restart
+		b) set password for the admin user in slave machine (if not configured)
+		in slave machine,
+			sudo passwd ubuntu #ubuntu is username
+			enter new password, confirm password
+			done
+		c) Generate ssh key in master machine
+			in Master machine
+				ssh-keygen
+				press enter when it ask for key
+				then the key will be generated
+				id_rsa.pub in /home/ubuntu/.ssh directory
+		d) Copy the generated key to slave mahcine
+			in master machine
+				ssh-copy-id ubuntu@slave machine private ip
+				enter password for slave machine when prompted
+				and now try to connect from master machine
+				it should be a passwordless connection.
+		e) Copy Slave.jar file from Master to slave
+			slave.jar is download by default in master machine while installing Jenkins
+			in slave
+			wget http://master private ip:8080/jnlpJar/slave.jar
+			
+	</>	
+	2)
+		
+	</>
+</>
+6) Tomcat<>
+	sudo apt install tomcat8 tomcat8-admin
+	
+	Creating user in Tomcat8
+		Goto CD etc/tomcat8
+		find tomcat-user.xml file and open with text editor to add users
+		command: sudo vi tomcat-users.xml
+		Add line: <user username="username" password="password" roles="manager-script, manager-status,manager-gui"/>
+		and then restart tomcat8
+		command: sudo service tomcat8 restart
+		Now the tomcat server is ready and will be access by public ipof the server combined with the port num 8080
+			ex: xxx.xxx.xx.xx:8080
+	</>
+7) Docker<>
+
+	Docker Installation<>
+	This script is meant for quick & easy install via:
+		# curl -fsSL https://get.docker.com -o get-docker.sh
+		# sh get-docker.sh
+	</>
+	Docker Sworm<>
+	Docker swarm is the tool used for performing container orchestration.
+		Container Orchestration: This is the process of running docker container in a distributed environment, on multiple docker host machines. All these containers can have a single service running on them and they share the resources between each other, even running on differnet host machines.
+		
+		Advantages:
+		1) Load balancing
+		2) Scaling of containers
+		3) performing rolling updates
+		4) handling failover scenarios
+		
+		Manager Machine > worker machines
+	</>	
+	Docker Commands<>
+		Docker run ~start a container
+		Docker container ls ~list of containers on a node
+		docker rm -f (container id)
+		Docker service create --name (service name) -p ****/**** --replicas 5 (image) ~create a service 
+		Docker service ps (service name) ~list service nodes list
+		Docker service ls ~list of services
+		docker service scale (servicename)=n ~to scale up/down docker containers
+		docker node ls
+	</>
+</>
+8) Ansible<>
+configuration management tool
+</>
+9) Terraform<>
+	terraform init
+	terraform validate
+	terraform plan
+	terrafrom apply
+	terraform destroy
+	
+</>
+9) Kubernates<>
+
+</>
+
+
+
+
+
+
+
+	
+	
+
+
+############################
+
+scp C:\Users\Omkar\.ssh\id_rsa.pub ubuntu@18.223.235.23:/home/ubuntu
+
+
+
+C:\Users\Omkar\.ssh
+	
+/home/ubuntu
+
+
+
+pipeline {
+	agent any
+	
+	stages {
+        stage('stage1') {
+			steps {
+			git 'https://github.com/sunildevops77/maven.git'
+			}
+		}
+	}
+}	
+
+
+
+pipeline {
+    agent any
+
+    tools {
+        // Install the Maven version configured as "M3" and add it to the path.
+        maven "M3"
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                // Get some code from a GitHub repository
+                git 'https://github.com/jglick/simple-maven-project-with-tests.git'
+
+                // Run Maven on a Unix agent.
+                sh "mvn -Dmaven.test.failure.ignore=true clean package"
+
+                // To run Maven on a Windows agent, use
+                // bat "mvn -Dmaven.test.failure.ignore=true clean package"
+            }
+
+            post {
+                // If Maven was able to run the tests, even if some of the test
+                // failed, record the test results and archive the jar file.
+                success {
+                    junit '**/target/surefire-reports/TEST-*.xml'
+                    archiveArtifacts 'target/*.jar'
+                }
+            }
+        }
+    }
+}
+
+    
