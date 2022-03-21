@@ -46,6 +46,11 @@ Pre-requisites for lab environment setup<>
 		git --version
 	Git commands
 		git init (converts a folder into working directory)
+		git config --global user.name "user name"
+		git config --global user.email user@ema.il
+		git remote add origin [remote repo url]
+		
+
 		git add //file name// (move a file to staging area - file called tracked file)
 		git add . (move all files to staging area)
 		git status (check the status of file)

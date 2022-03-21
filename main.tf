@@ -1,46 +1,116 @@
 provider "aws" {
-  region     = "us-east-1"
-  access_key = "AKIAJTTSSUF2PB6HDCCA"
-  secret_key = "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"
+  region     = "us-east-2"
+  access_key = "AKIA4Z62VICD4WKGQHG7"
+  secret_key = "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"
 }
 
-variable "subnet_prefix" {
-  description = "cidr block for the subnet"
-
-}
-
-
-
-resource "aws_vpc" "prod-vpc" {
+resource "aws_vpc" "lab_vpc" {
   cidr_block = "10.0.0.0/16"
   tags = {
-    Name = "production"
+    Name = "lab_vpc"
   }
 }
 
-resource "aws_subnet" "subnet-1" {
-  vpc_id            = aws_vpc.prod-vpc.id
-  cidr_block        = var.subnet_prefix[0].cidr_block
-  availability_zone = "us-east-1a"
+resource "aws_subnet" "subnet0" {
+  vpc_id            = aws_vpc.lab_vpc.id
+  cidr_block        = "10.0.1.0/24"
+  availability_zone = "us-east-2a"
 
   tags = {
-    Name = var.subnet_prefix[0].name
+    Name = "subnet0"
   }
 }
 
-resource "aws_subnet" "subnet-2" {
-  vpc_id            = aws_vpc.prod-vpc.id
-  cidr_block        = var.subnet_prefix[1].cidr_block
-  availability_zone = "us-east-1a"
+resource "aws_internet_gateway" "lab-gateway" {
+  vpc_id = aws_vpc.lab_vpc.id
 
   tags = {
-    Name = var.subnet_prefix[1].name
+    Name = "labgate"
   }
 }
 
+resource "aws_eip" "eip" {
+  instance = aws_instance.server0.id
+  vpc      = true
+}
 
+resource "aws_route_table" "labtable" {
+  vpc_id = aws_vpc.lab_vpc.id
 
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.lab-gateway.id
+  }
 
+  tags = {
+    Name = "labroute"
+  }
+}
+
+resource "aws_route_table_association" "a0" {
+  subnet_id      = aws_subnet.subnet0.id
+  route_table_id = aws_route_table.labtable.id
+}
+
+resource "aws_network_interface" "server0-nic" {
+  subnet_id       = aws_subnet.subnet0.id
+  security_groups = [aws_security_group.lab_sg.id]
+  private_ip = "10.0.1.50"
+  tags = {
+    name = "server0-nic"
+  }
+}
+
+resource "aws_security_group" "lab_sg" {
+  name        = "allow_tls"
+  description = "Allow TLS inbound traffic"
+  vpc_id      = aws_vpc.lab_vpc.id
+
+ingress {
+  description = "TLS"
+  from_port   = 0
+  to_port     = 0
+  protocol    = "-1"
+  cidr_blocks = ["0.0.0.0/0"]
+}
+
+egress {
+  from_port   = 0
+  to_port     = 0
+  protocol    = "-1"
+  cidr_blocks = ["0.0.0.0/0"]
+}
+
+tags = {
+  Name = "lab_sg"
+}
+}
+
+resource "aws_instance" "server0" {
+ami               = "ami-03a0c45ebc70f98ea"
+instance_type     = "t2.micro"
+availability_zone = "us-east-2a"
+key_name          = "tmac01"
+
+network_interface {
+  device_index         = 0
+#  private_ip = "10.0.0.50"
+  network_interface_id = aws_network_interface.server0-nic.id
+}
+user_data = <<-EOF
+              #!/bin/bash
+              sudo apt-get update -y
+              sudo apt-get install default-jdk -y
+              sudo apt-get install git python2 python3 python-pip -y
+              sudo apt-get update && sudo apt-get install -y gnupg software-properties-common curl
+              curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+              sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+              sudo apt-get update && sudo apt-get install terraform
+              EOF
+tags = {
+  Name = "server0"
+}
+}
 
 
 

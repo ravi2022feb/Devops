@@ -1,0 +1,8 @@
+Access Key ID:
+AKIA4Z62VICD4WKGQHG7
+Secret Access Key:
+EgvXYag3ioJaDdiEoUWKJu2zY8sqdN6aojUt4Q/7
+
+
+
+Successfully created ami-0f4987d9a9835f4e4 from instance i-02d2b0fd83b0fecb0.
