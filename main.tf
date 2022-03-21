@@ -41,15 +41,20 @@ resource "aws_route_table" "labtable" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.lab-gateway.id
   }
+  route {
+    ipv6_cidr_block        = "::/0"
+    gateway_id = aws_internet_gateway.lab-gateway.id
+  }
 
   tags = {
     Name = "labroute"
   }
 }
 
-resource "aws_route_table_association" "a0" {
+resource "aws_route_table_association" "a" {
   subnet_id      = aws_subnet.subnet0.id
   route_table_id = aws_route_table.labtable.id
+
 }
 
 resource "aws_network_interface" "server0-nic" {
@@ -62,23 +67,26 @@ resource "aws_network_interface" "server0-nic" {
 }
 
 resource "aws_security_group" "lab_sg" {
-  name        = "allow_tls"
-  description = "Allow TLS inbound traffic"
+  name        = "allow traffic"
+  description = "Allow inbound traffic"
   vpc_id      = aws_vpc.lab_vpc.id
 
 ingress {
-  description = "TLS"
+  description = "In-Traffic"
   from_port   = 0
   to_port     = 0
   protocol    = "-1"
   cidr_blocks = ["0.0.0.0/0"]
+  ipv6_cidr_blocks = ["::/0"]
 }
 
 egress {
+  description = ")ut-Traffic"
   from_port   = 0
   to_port     = 0
   protocol    = "-1"
   cidr_blocks = ["0.0.0.0/0"]
+  ipv6_cidr_blocks = ["::/0"]
 }
 
 tags = {
